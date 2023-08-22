@@ -12,25 +12,55 @@
     <title>Document</title>
 </head>
 <body>
+    <div class="radio-boxes">
+        <h1>Start Screen</h1>
+        <h4 style="margin-top: 20px;">How many lives do you wish to start with?</h4>
+            <div>
+                <input type="radio" id="rad" name="drone" value="3"/>
+                <label for="huey">3 lives</label>
+            </div>
+            <div>
+                <input type="radio" id="rad" name="drone" value="5"/>
+                <label for="huey">5 lives</label>
+            </div>
+            <div>
+                <input type="radio" id="rad" name="drone" value="7"/>
+                <label for="huey">7 lives</label>
+            </div>
+            <div>
+                <button type="submit" style="font-size: 1.3rem;" onclick="handleRadio()" class="btn">Start Game</button>
+            </div>
+
+    <h3 style="margin-top: 20px;">Feito por: Felipe Kureski, Felipe Leuck e Tiago Prestes.</h3>
+    </div>
     <section class="main-container">
         <h1>Naval Battle</h1>
         <p>(purposely made difficult)</p>
         <table class="game-container">
             <script lang="Javascript">
-                for (let i = 0; i < 5; i++) {
+                for (let i = 0; i < 8; i++) {
                     document.write("<tr>")
-                    for (let j = 0; j < 8; j++) {
+                    for (let j = 0; j < 12; j++) {
                             document.write(`<td onclick='handleClick(${i}, ${j})'><img class='tile' id='ship${i}${j}' src='./assets/tile.jpg'></td>`);   
                     }
                 }
             </script>
         </table>
         <div id="alert" class="count-msg" style="margin-top: 1rem;"></div>
-        <div class="score-box">
-            <div id="score" style="font-size: 3rem;">Score: 0</div>
-            <div id="lives" style="font-size: 3rem;">Lives: 15</div>
+        <div class="check-notif">
+            <div>
+                <input type="checkbox" id="chk-notifs"/>
+                <label for="scales">Stop messages?</label>    
+            </div>
         </div>
-        <button class="btn-reset" onclick="location.reload()">Reset</button>
+        <div class="score-box">
+            <div id="score" style="font-size: 2rem;">Score: 0</div>
+            <div id="lives" style="font-size: 2rem;"></div>
+            <div>
+                <button class="btn" onclick="location.reload()">Reset</button>
+            </div> 
+        </div>
+        
     </section>
     <script src="./app.js"></script>
 </body>

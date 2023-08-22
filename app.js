@@ -1,3 +1,10 @@
+// Elementos HTML
+const scoreElement = document.getElementById('score');
+const livesElement = document.getElementById('lives');
+const notifElement = document.getElementById('alert');
+const mainGame = document.querySelector('.main-container');
+const startMenu = document.querySelector('.radio-boxes');
+
 // Gerar coordenadas aleatórias
 function randomNum(max, min) {
     return Math.round(Math.random() * (max - min) + min);
@@ -7,21 +14,33 @@ function randomNum(max, min) {
 function generateTargetCoords() {
     let shipCoordinates = [];
 
-    const numOfShips = randomNum(3, 5);
+    const numOfShips = randomNum(10, 15);
 
     for (let i = 0; i < numOfShips; i++) {
-        const x = randomNum(4, 0);
-        const y = randomNum(7, 0);
+        const x = randomNum(8, 0);
+        const y = randomNum(12, 0);
         shipCoordinates.push(`ship${x}${y}`);
     }
 
     return shipCoordinates;
 }
 
+// Gerar coordenadas dos 2 bônus
+function generateBonusCoords() {
+    let bonusCoordinates = [];
+
+    for (let i = 0; i < 2; i++) {
+        const x = randomNum(8, 0);
+        const y = randomNum(12, 0);
+        bonusCoordinates.push(`ship${x}${y}`)
+    }
+
+    return bonusCoordinates;
+}
+
 // Função listener de cada célula da table
 function handleClick(i, j) {
-
-    // Quando acaba as vidas
+    // Checkpoint para quando acaba as vidas
     if (lives == 0) {
         alert("No lives left! Press the Reset button.")
 
@@ -31,7 +50,7 @@ function handleClick(i, j) {
         return;
     };
     
-    // Quanda ganha
+    // Checkpoint para quando ganha
     if (numOfShips == 0) {
         alert("You won! Reset to play more.")
 
@@ -40,59 +59,124 @@ function handleClick(i, j) {
         return;
     }
 
+    // Captando a célula clicada
     const td = document.getElementById(`ship${i}${j}`);
     const tdId = td.id;
     console.log(`Cell hit: ${tdId}`)
 
-    // Flag de hit
-    let hitFlag = false;
+    // Checando se a célula clicada é uma bomba
+    for (let i = 0; i < bonusCoordinates.length; i++) {
+        if (tdId == bonusCoordinates[0]) {
+            td.src = "./assets/nuke.jpeg";
+            return;
+        }
+        else if (tdId == bonusCoordinates[1]) {
+            td.src = "./assets/missile.jpeg";
+            return;
+        }
+    }
 
+    // Checkpoint de Hit ou Miss
+    let hitFlag = false;
     for (let item of shipCoordinates) {
         if (tdId == item) hitFlag = true;
     }
-
     return hitFlag ? handleHit(td) : handleMiss(td);
 }
 
+
+// Função de hit
 function handleHit(tableCell) {
 	tableCell.src = "./assets/shipwreck.png";
     // Aumentar score e restaurar uma vida
 	score++;
-    lives++;
 
     // Diminur número de navios
     numOfShips--;
 
-    // Atualizar HTML interno
-    notifElement.innerHTML = `You gained a life!`;
-    setTimeout(() => notifElement.innerHTML = `Ships left: ${numOfShips}`, 1000);
+    // Desativar notificação, se habilitado
+    if (!isNotifDisabled()) {
+        notifElement.innerHTML = `Você acertou um alvo!`;
+        setTimeout(() => notifElement.innerHTML = `Ships left: ${numOfShips}`, 1000);    
+    }
+    
+    notifElement.innerHTML = `Ships left: ${numOfShips}`;
     scoreElement.innerHTML = `Score: ${score}`;
-    livesElement.innerHTML = `Lives: ${lives}`;
 
 	return;
 }
 
+// Função de erro
 function handleMiss(tableCell) {
 	tableCell.src = "./assets/ocean.png";
-    
+    console.log(lives)
     // Diminuir vida
     lives--;
-
-    // Atualizar HTML
+    console.log(lives)
     livesElement.innerHTML = `Lives: ${lives}`;
+
+    // Desativar notificação, se habilitado
+    if (!isNotifDisabled()) {
+        notifElement.innerHTML = `Deu água!`;
+        setTimeout(() => notifElement.innerHTML = `Ships left: ${numOfShips}`, 1000);
+    }
 
 	return;
 }
 
+window.addEventListener("load", () => {
+    checkElement = document.getElementById('chk-notifs');
+    checkElement.addEventListener('click', (e) => {
+        isNotif = e.target.checked;
+    })
+});
 
-const scoreElement = document.getElementById('score');
-const livesElement = document.getElementById('lives');
-const notifElement = document.getElementById('alert');
-
+// Variáveis de função
 const shipCoordinates = generateTargetCoords();
+const bonusCoordinates = generateBonusCoords();
 
+// Variáveis globais
 let score = 0;
-let lives = 15;
 let numOfShips = shipCoordinates.length;
+let checkElement;
+let isNotif = false;
+let radioCheckedValue;
+let lives;
 
+// Inicialização de HTML dentro do game
 notifElement.innerHTML = `Ships left: ${numOfShips}`;
+
+// Getter de isNotif
+function isNotifDisabled() {
+    return isNotif;
+}
+
+// Função para verificar qual radio está marcado
+function handleRadio() {
+    const radioElements = document.querySelectorAll('#rad');
+    for (let radio of radioElements) {
+        if (radio.checked) {
+            radioCheckedValue = parseInt(radio.value);
+            livesElement.innerHTML = `Lives: ${radioCheckedValue}`
+
+            mainGame.style.visibility = "visible";
+            startMenu.style.display = "none";
+
+            lives = radioCheckedValue;
+        }
+    }
+    return;
+}
+
+// Verificação de coordenadas do bônus X coordenadas navios
+function isCoordsRepeated() {
+    for (let bonusCoord of bonusCoordinates) {
+        for (let shipCoord of shipCoordinates) {
+            if (bonusCoord == shipCoord) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
