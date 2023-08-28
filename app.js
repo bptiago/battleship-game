@@ -5,6 +5,46 @@ const notifElement = document.getElementById('alert');
 const mainGame = document.querySelector('.main-container');
 const startMenu = document.querySelector('.radio-boxes');
 
+// Função listener de cada célula da table
+function handleClick(i, j) {
+    // Checkpoint para quando acaba as vidas
+    if (isDead()) return;
+    
+    // Checkpoint para quando ganha
+    if(isWin()) return;
+
+    // Captando a célula clicada
+    const tableCell = document.getElementById(`ship${i}${j}`);
+    console.log(`Cell hit: ${tableCell.id}`)
+
+    // Aplicar o ataque escolhido
+    if (selectedAttack === 'basic-attack') {
+        doBasicAttack(tableCell);
+    } 
+    else if (selectedAttack === 'bomb') {
+
+    }
+    else if (selectedAttack === 'atomic-bomb') {
+
+    }
+    else {
+        alert('Choose a valid attack option!');
+        return;
+    }
+
+    // Checando se a célula clicada é uma bomba
+    for (let i = 0; i < bonusCoordinates.length; i++) {
+        if (tableCell.id == bonusCoordinates[0]) {
+            tableCell.src = "./assets/nuke.jpeg";
+            return;
+        }
+        else if (tableCell.id == bonusCoordinates[1]) {
+            tableCell.src = "./assets/missile.jpeg";
+            return;
+        }
+    }
+}
+
 // Gerar coordenadas aleatórias
 function randomNum(max, min) {
     return Math.round(Math.random() * (max - min) + min);
@@ -38,61 +78,15 @@ function generateBonusCoords() {
     return bonusCoordinates;
 }
 
-// Função listener de cada célula da table
-function handleClick(i, j) {
-    // Checkpoint para quando acaba as vidas
-    if (lives == 0) {
-        alert("No lives left! Press the Reset button.")
-
-        notifElement.className = "end-msg";
-        notifElement.innerHTML = `No more lives. You missed ${numOfShips} ships.`;
-
-        return;
-    };
-    
-    // Checkpoint para quando ganha
-    if (numOfShips == 0) {
-        alert("You won! Reset to play more.")
-
-        notifElement.innerHTML = `You won!`;
-
-        return;
-    }
-
-    // Captando a célula clicada
-    const td = document.getElementById(`ship${i}${j}`);
-    const tdId = td.id;
-    console.log(`Cell hit: ${tdId}`)
-
-    // Checando se a célula clicada é uma bomba
-    for (let i = 0; i < bonusCoordinates.length; i++) {
-        if (tdId == bonusCoordinates[0]) {
-            td.src = "./assets/nuke.jpeg";
-            return;
-        }
-        else if (tdId == bonusCoordinates[1]) {
-            td.src = "./assets/missile.jpeg";
-            return;
-        }
-    }
-
-    // Checkpoint de Hit ou Miss
-    let hitFlag = false;
-    for (let item of shipCoordinates) {
-        if (tdId == item) hitFlag = true;
-    }
-    return hitFlag ? handleHit(td) : handleMiss(td);
-}
-
-
 // Função de hit
-function handleHit(tableCell) {
+function handleHit(tableCell, shipsHit) {
 	tableCell.src = "./assets/shipwreck.png";
-    // Aumentar score e restaurar uma vida
-	score++;
+
+    // Aumentar score
+	score += shipsHit;
 
     // Diminur número de navios
-    numOfShips--;
+    numOfShips -= shipsHit;
 
     // Desativar notificação, se habilitado
     if (!isNotifDisabled()) {
@@ -109,10 +103,9 @@ function handleHit(tableCell) {
 // Função de erro
 function handleMiss(tableCell) {
 	tableCell.src = "./assets/ocean.png";
-    console.log(lives)
+
     // Diminuir vida
     lives--;
-    console.log(lives)
     livesElement.innerHTML = `Lives: ${lives}`;
 
     // Desativar notificação, se habilitado
@@ -142,6 +135,7 @@ let checkElement;
 let isNotif = false;
 let radioCheckedValue;
 let lives;
+let selectedAttack = '';
 
 // Inicialização de HTML dentro do game
 notifElement.innerHTML = `Ships left: ${numOfShips}`;
@@ -151,7 +145,7 @@ function isNotifDisabled() {
     return isNotif;
 }
 
-// Função para verificar qual radio está marcado
+// Função para verificar qual radio check está marcado
 function handleRadio() {
     const radioElements = document.querySelectorAll('#rad');
     for (let radio of radioElements) {
@@ -180,3 +174,50 @@ function isCoordsRepeated() {
 
     return false;
 }
+
+// Watcher do select de ataques
+function watchAttackSelector() {
+    const selectValue = document.getElementById('atk-type').value;
+    console.log(selectValue);
+    selectedAttack = selectValue;
+}
+
+// Checkpoint de zero vidas
+function isDead() {
+    if (lives == 0) {
+        alert("No lives left! Press the Reset button.")
+
+        notifElement.className = "end-msg";
+        notifElement.innerHTML = `No more lives. You missed ${numOfShips} ships.`;
+
+        return true;
+    };
+}
+
+// Win checkpoint
+function isWin() {
+    if (numOfShips == 0) {
+        alert("You won! Reset to play more.")
+
+        notifElement.innerHTML = `You won!`;
+
+        return true;
+    }
+}
+
+// Basic attack
+function doBasicAttack(tableCell) {
+    let hitFlag = false;
+    let shipsHit = 0;
+
+    for (let shipCoordinate of shipCoordinates) {
+        if (tableCell.id == shipCoordinate) {
+            hitFlag = true;
+            shipsHit++;
+        }
+    }
+
+    return hitFlag ? handleHit(tableCell, shipsHit) : handleMiss(tableCell);
+}
+
+// Bomb Attack

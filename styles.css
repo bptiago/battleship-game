@@ -45,8 +45,7 @@ table {
 .btn {
     display: flex;
     margin: 0 auto;
-    padding: 1rem 2rem;
-    margin-top: 5px;
+    padding: 1rem 1.5rem;
     
     font-size: 1.5rem;
     color: rgb(255, 249, 249);
@@ -75,7 +74,6 @@ table {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0.5rem;
     gap: 3rem;
 }
 
@@ -138,4 +136,19 @@ table {
 
 .radio-boxes label {
     font-size: 2rem;
+}
+
+.select-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+
+    font-size: 2rem;
+
+    margin-top: 5px;
+}
+
+.select-container option {
+    font-size: 1.2rem;
 }

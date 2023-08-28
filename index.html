@@ -46,7 +46,16 @@
                 }
             </script>
         </table>
-        <div id="alert" class="count-msg" style="margin-top: 1rem;"></div>
+        <div class="select-container">
+            <label for="atk-type">Choose an attack:</label>
+            <select name="attacks" id="atk-type" class="select-options" onchange="watchAttackSelector()">
+                <option value="">--Please choose an option--</option>
+                <option value="basic-attack">Basic Attack (unlimited)</option>
+                <option value="bomb">Bomb (2x)</option>
+                <option value="atomic-bomb">Atomic Bomb (1x)</option>
+            </select>
+        </div>
+        <div id="alert" class="count-msg" style="margin-top: 5px;"></div>
         <div class="check-notif">
             <div>
                 <input type="checkbox" id="chk-notifs"/>
