@@ -7,6 +7,7 @@ const startMenu = document.querySelector('.radio-boxes');
 
 // Função listener de cada célula da table
 function handleClick(i, j) {
+    console.log(shipCoordinates);
     // Checkpoint para quando acaba as vidas
     if (isDead()) return;
     
@@ -15,18 +16,55 @@ function handleClick(i, j) {
 
     // Captando a célula clicada
     const tableCell = document.getElementById(`ship${i}${j}`);
-    console.log(`Cell hit: ${tableCell.id}`)
+    console.log(`Cell hit: ${tableCell.id}`);
 
-    // Aplicar o ataque escolhido
-    if (selectedAttack === 'basic-attack') {
-        doBasicAttack(tableCell);
+    // Ataque básico
+    if (selectedAttack == 'basic-attack') {
+        if (isHit(tableCell)) {
+            showHitShip(tableCell);
+            score++;
+            numOfShips--;
+
+            // send notif
+            // update score and lives div
+        } else {
+            showOcean(tableCell);
+            lives--;
+            // send notif
+            // update score and lives div
+        }
     } 
-    else if (selectedAttack === 'bomb') {
+    // Ataque de bomba
+    else if (selectedAttack == 'bomb') {
+        const surroundingCells = getBombAttackSurroundingCells(i, j);
 
-    }
-    else if (selectedAttack === 'atomic-bomb') {
+        const numOfShipsHit = getNumOfShipsHit(surroundingCells)
+        
+        numOfShipsHit ? score += numOfShipsHit : lives--;
 
+        numOfShips -= numOfShipsHit;
+
+        // send notif
+        // update score and lives div
+        
+        showAttackedTiles(surroundingCells);
     }
+    // Ataque atômico
+    else if (selectedAttack == 'atomic-bomb') {
+       const surroundingCells = getAtomicAttackSurroundingCells(i, j);
+       
+       const numOfShipsHit = getNumOfShipsHit(surroundingCells);
+       
+       numOfShipsHit ? score += numOfShipsHit : lives--;
+       
+       numOfShips -= numOfShipsHit;
+
+       // send notif
+       // update score and lives div
+
+       showAttackedTiles(surroundingCells);
+    }
+    // Checker de opção inválida
     else {
         alert('Choose a valid attack option!');
         return;
@@ -205,19 +243,88 @@ function isWin() {
     }
 }
 
-// Basic attack
-function doBasicAttack(tableCell) {
+function isHit(tableCell) {
     let hitFlag = false;
-    let shipsHit = 0;
 
     for (let shipCoordinate of shipCoordinates) {
         if (tableCell.id == shipCoordinate) {
             hitFlag = true;
-            shipsHit++;
         }
     }
 
-    return hitFlag ? handleHit(tableCell, shipsHit) : handleMiss(tableCell);
+    return hitFlag;
 }
 
 // Bomb Attack
+function getBombAttackSurroundingCells(i, j) {
+	const surroundingCells = [];
+	
+	for (let a = -1; a < 2; a++) {
+        if (a == 0) {
+            for (let b = -1; b < 2; b++) {
+                const cell = document.getElementById(`ship${i + a}${j + b}`);
+                surroundingCells.push(cell);
+            }
+        }
+
+        const cell = document.getElementById(`ship${i + a}${j}`);
+        surroundingCells.push(cell);
+    }
+
+	return surroundingCells;
+}
+
+// Identificar células de ataque atômico
+function getAtomicAttackSurroundingCells(i, j) {
+    const surroundingCells = [];
+    
+    for (let a = -1; a < 2; a++) {
+        for (let b = -1; b < 2; b++) {
+            const cell = document.getElementById(`ship${i + a}${j + b}`);
+            surroundingCells.push(cell);
+        }
+    }
+
+    return surroundingCells;
+}
+
+// Mostrar células atacadas
+function showAttackedTiles(surroundingCells) {
+    for (surroundingCell of surroundingCells) {
+
+        let flag = false;
+
+        for (shipCoordinate of shipCoordinates) {
+            if (surroundingCell.id == shipCoordinate) {
+                flag = true;
+                console.log(surroundingCell.id)
+            }
+        }
+
+        flag ? showHitShip(surroundingCell) : showOcean(surroundingCell);
+    }
+
+    return;
+}
+
+function getNumOfShipsHit(surroundingCells) {
+    let shipsHit = 0;
+
+    for (surroundingCell of surroundingCells) {
+        for (shipCoordinate of shipCoordinates) {
+            if (surroundingCell.id == shipCoordinate) {
+                shipsHit++;
+            }
+        }
+    }
+
+    return shipsHit;
+}
+
+function showHitShip(tableCell) {
+    tableCell.src = './assets/shipwreck.png';
+}
+  
+  function showOcean(tableCell) {
+    tableCell.src = './assets/ocean.png';
+}
