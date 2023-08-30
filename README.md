@@ -1,6 +1,6 @@
 # Battleship
 
-(unusually hard) naval battle for loners
+(unusually hard) battleship for loners
 
 <b>work in progress</b>
 
