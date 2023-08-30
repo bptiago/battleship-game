@@ -13,25 +13,23 @@
 </head>
 <body>
     <div class="radio-boxes">
-        <h1>Start Screen</h1>
-        <h4 style="margin-top: 20px;">How many lives do you wish to start with?</h4>
-            <div>
-                <input type="radio" id="rad" name="drone" value="3"/>
-                <label for="huey">3 lives</label>
-            </div>
-            <div>
-                <input type="radio" id="rad" name="drone" value="5"/>
-                <label for="huey">5 lives</label>
-            </div>
-            <div>
-                <input type="radio" id="rad" name="drone" value="7"/>
-                <label for="huey">7 lives</label>
-            </div>
-            <div>
-                <button type="submit" style="font-size: 1.3rem;" onclick="handleRadio()" class="btn">Start Game</button>
-            </div>
-
-    <h3 style="margin-top: 20px;">Feito por: Felipe Kureski, Felipe Leuck e Tiago Prestes.</h3>
+        <img class="logo" src="./assets/battleship-logo.png" alt="Battleship-logo">
+        <h4>How many lives do you wish to start with?</h4>
+        <div>
+            <input type="radio" id="rad" name="drone" value="3"/>
+            <label for="huey">3 lives</label>
+        </div>
+        <div>
+            <input type="radio" id="rad" name="drone" value="5"/>
+            <label for="huey">5 lives</label>
+        </div>
+        <div>
+            <input type="radio" id="rad" name="drone" value="7"/>
+            <label for="huey">7 lives</label>
+        </div>
+        <div>
+            <button type="submit" style="font-size: 1.3rem;" onclick="handleRadio()" class="btn">Start Game</button>
+        </div>
     </div>
     <section class="main-container">
         <h1>Naval Battle</h1>
@@ -51,8 +49,8 @@
             <select name="attacks" id="atk-type" class="select-options" onchange="watchAttackSelector()">
                 <option value="">--Please choose an option--</option>
                 <option value="basic-attack">Basic Attack (unlimited)</option>
-                <option value="bomb">Bomb (2x)</option>
-                <option value="atomic-bomb">Atomic Bomb (1x)</option>
+                <option value="bomb">Bomb</option>
+                <option value="atomic-bomb">Atomic Bomb</option>
             </select>
         </div>
         <div id="alert" class="count-msg" style="margin-top: 5px;"></div>

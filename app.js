@@ -5,9 +5,27 @@ const notifElement = document.getElementById('alert');
 const mainGame = document.querySelector('.main-container');
 const startMenu = document.querySelector('.radio-boxes');
 
+// Variáveis de função
+const shipCoordinates = generateTargetCoords();
+const bonusCoordinates = shipCoordinates.splice(-2, 2); // É um splice pois é o meio mais fácil de evitar a repetição de coord entre um navio e um bônus
+
+// Variáveis globais
+let score = 0;
+let numOfShips = shipCoordinates.length;
+let checkElement;
+let isNotif = false;
+let radioCheckedValue;
+let lives;
+let selectedAttack = '';
+let bomb = 2;
+let atomicBomb = 1;
+
+// Inicialização de HTML dentro do game
+notifElement.innerHTML = `Ships left: ${numOfShips}`;
+
 // Função listener de cada célula da table
-function handleClick(i, j) {
-    console.log(shipCoordinates);
+function handleClick(i, j) {    
+
     // Checkpoint para quando acaba as vidas
     if (isDead()) return;
     
@@ -22,64 +40,86 @@ function handleClick(i, j) {
     if (selectedAttack == 'basic-attack') {
         if (isHit(tableCell)) {
             showHitShip(tableCell);
-            score++;
-            numOfShips--;
-
-            // send notif
+            
+            updateScore(1);
+      
+            if (isNotifDisabled) notifyHit();
             // update score and lives div
         } else {
-            showOcean(tableCell);
-            lives--;
-            // send notif
-            // update score and lives div
+            if (tableCell.id == bonusCoordinates[0]) {
+              showBomb(tableCell);
+              notifyBonus();
+              bomb++;
+            }
+            else if (tableCell.id == bonusCoordinates[1]) {
+              showAtomicBomb(tableCell);
+              notifyBonus();
+              atomicBomb++;
+            } else {
+              showOcean(tableCell);
+              
+              updateLives();
+              
+              if (isNotifDisabled) notifyMiss();
+            }
         }
     } 
     // Ataque de bomba
     else if (selectedAttack == 'bomb') {
+
+        // Checagem de munição
+        if (!bomb) {alert('You have no more bombs! Find more.'); return;}
+
+        // Decréscimo de munição
+        bomb--;
+
         const surroundingCells = getBombAttackSurroundingCells(i, j);
+        const numOfShipsHit = getNumOfShipsHit(surroundingCells);
+        const numOfBonusHit = getNumOfBonusHit(surroundingCells);
 
-        const numOfShipsHit = getNumOfShipsHit(surroundingCells)
-        
-        numOfShipsHit ? score += numOfShipsHit : lives--;
+        if (numOfShipsHit) {
+            updateScore(numOfShipsHit);
+            if (isNotifDisabled) notifyHit();
+        } else if (numOfBonusHit) {
+            if (isNotifDisabled) notifyBonus();
+        }
+        else {
+            updateLives();
+            if (isNotifDisabled) notifyMiss();
+        }
 
-        numOfShips -= numOfShipsHit;
-
-        // send notif
-        // update score and lives div
-        
         showAttackedTiles(surroundingCells);
     }
     // Ataque atômico
     else if (selectedAttack == 'atomic-bomb') {
-       const surroundingCells = getAtomicAttackSurroundingCells(i, j);
-       
-       const numOfShipsHit = getNumOfShipsHit(surroundingCells);
-       
-       numOfShipsHit ? score += numOfShipsHit : lives--;
-       
-       numOfShips -= numOfShipsHit;
+        
+        // Checagem de munição
+        if (!atomicBomb) {alert('You have no more nuke! Find more.'); return;}
 
-       // send notif
-       // update score and lives div
+        // Decréscimo de munição
+        atomicBomb--;
 
-       showAttackedTiles(surroundingCells);
+        const surroundingCells = getAtomicAttackSurroundingCells(i, j);
+        const numOfShipsHit = getNumOfShipsHit(surroundingCells);
+        const numOfBonusHit = getNumOfBonusHit(surroundingCells);
+
+        if (numOfShipsHit) {
+            updateScore(numOfShipsHit);
+            if (isNotifDisabled) notifyHit();
+        } else if (numOfBonusHit) {
+            if (isNotifDisabled) notifyBonus();
+        }
+        else {
+            updateLives();
+            if (isNotifDisabled) notifyMiss();
+        }
+        
+        showAttackedTiles(surroundingCells);
     }
     // Checker de opção inválida
     else {
         alert('Choose a valid attack option!');
         return;
-    }
-
-    // Checando se a célula clicada é uma bomba
-    for (let i = 0; i < bonusCoordinates.length; i++) {
-        if (tableCell.id == bonusCoordinates[0]) {
-            tableCell.src = "./assets/nuke.jpeg";
-            return;
-        }
-        else if (tableCell.id == bonusCoordinates[1]) {
-            tableCell.src = "./assets/missile.jpeg";
-            return;
-        }
     }
 }
 
@@ -88,71 +128,19 @@ function randomNum(max, min) {
     return Math.round(Math.random() * (max - min) + min);
 }
 
-// Será posta 6 navios no jogo
+// Geração de coordenadas dos navios e de 2 bônus (são os últimos 2 índices)
 function generateTargetCoords() {
     let shipCoordinates = [];
 
     const numOfShips = randomNum(10, 15);
 
     for (let i = 0; i < numOfShips; i++) {
-        const x = randomNum(8, 0);
-        const y = randomNum(12, 0);
+        const x = randomNum(7, 0);
+        const y = randomNum(11, 0);
         shipCoordinates.push(`ship${x}${y}`);
     }
 
     return shipCoordinates;
-}
-
-// Gerar coordenadas dos 2 bônus
-function generateBonusCoords() {
-    let bonusCoordinates = [];
-
-    for (let i = 0; i < 2; i++) {
-        const x = randomNum(8, 0);
-        const y = randomNum(12, 0);
-        bonusCoordinates.push(`ship${x}${y}`)
-    }
-
-    return bonusCoordinates;
-}
-
-// Função de hit
-function handleHit(tableCell, shipsHit) {
-	tableCell.src = "./assets/shipwreck.png";
-
-    // Aumentar score
-	score += shipsHit;
-
-    // Diminur número de navios
-    numOfShips -= shipsHit;
-
-    // Desativar notificação, se habilitado
-    if (!isNotifDisabled()) {
-        notifElement.innerHTML = `Você acertou um alvo!`;
-        setTimeout(() => notifElement.innerHTML = `Ships left: ${numOfShips}`, 1000);    
-    }
-    
-    notifElement.innerHTML = `Ships left: ${numOfShips}`;
-    scoreElement.innerHTML = `Score: ${score}`;
-
-	return;
-}
-
-// Função de erro
-function handleMiss(tableCell) {
-	tableCell.src = "./assets/ocean.png";
-
-    // Diminuir vida
-    lives--;
-    livesElement.innerHTML = `Lives: ${lives}`;
-
-    // Desativar notificação, se habilitado
-    if (!isNotifDisabled()) {
-        notifElement.innerHTML = `Deu água!`;
-        setTimeout(() => notifElement.innerHTML = `Ships left: ${numOfShips}`, 1000);
-    }
-
-	return;
 }
 
 window.addEventListener("load", () => {
@@ -161,22 +149,6 @@ window.addEventListener("load", () => {
         isNotif = e.target.checked;
     })
 });
-
-// Variáveis de função
-const shipCoordinates = generateTargetCoords();
-const bonusCoordinates = generateBonusCoords();
-
-// Variáveis globais
-let score = 0;
-let numOfShips = shipCoordinates.length;
-let checkElement;
-let isNotif = false;
-let radioCheckedValue;
-let lives;
-let selectedAttack = '';
-
-// Inicialização de HTML dentro do game
-notifElement.innerHTML = `Ships left: ${numOfShips}`;
 
 // Getter de isNotif
 function isNotifDisabled() {
@@ -200,22 +172,9 @@ function handleRadio() {
     return;
 }
 
-// Verificação de coordenadas do bônus X coordenadas navios
-function isCoordsRepeated() {
-    for (let bonusCoord of bonusCoordinates) {
-        for (let shipCoord of shipCoordinates) {
-            if (bonusCoord == shipCoord) {
-                return true;
-            }
-        }
-    }
-
-    return false;
-}
-
 // Watcher do select de ataques
 function watchAttackSelector() {
-    const selectValue = document.getElementById('atk-type').value;
+    const selectValue = document.getElementById('atk-type').value;   
     console.log(selectValue);
     selectedAttack = selectValue;
 }
@@ -288,25 +247,7 @@ function getAtomicAttackSurroundingCells(i, j) {
     return surroundingCells;
 }
 
-// Mostrar células atacadas
-function showAttackedTiles(surroundingCells) {
-    for (surroundingCell of surroundingCells) {
-
-        let flag = false;
-
-        for (shipCoordinate of shipCoordinates) {
-            if (surroundingCell.id == shipCoordinate) {
-                flag = true;
-                console.log(surroundingCell.id)
-            }
-        }
-
-        flag ? showHitShip(surroundingCell) : showOcean(surroundingCell);
-    }
-
-    return;
-}
-
+// Verificar se foi acertado um navio
 function getNumOfShipsHit(surroundingCells) {
     let shipsHit = 0;
 
@@ -321,10 +262,105 @@ function getNumOfShipsHit(surroundingCells) {
     return shipsHit;
 }
 
+// Verificar se foi acertado um navio
+function getNumOfBonusHit(surroundingCells) {
+    let bonusHit = 0;
+
+    for (surroundingCell of surroundingCells) {
+        for (bonusCoordinate of bonusCoordinates) {
+            if (surroundingCell.id == bonusCoordinate) {
+                bonusHit++;
+            }
+        }
+    }
+
+    return bonusHit;
+}
+
+// Mostrar células atacadas
+function showAttackedTiles(surroundingCells) {
+    for (surroundingCell of surroundingCells) {
+
+        let shipFlag = false;
+        let bombFlag = false;
+        let atomicBombFlag = false
+        
+        // Checagem de navios
+        for (shipCoordinate of shipCoordinates) {
+            if (surroundingCell.id == shipCoordinate) {
+                shipFlag = true;
+                console.log(surroundingCell.id)
+            }
+        }
+        
+        // Checagem de bônus
+        if (surroundingCell.id == bonusCoordinates[0]) {bomb++; bombFlag = true;}
+        if (surroundingCell.id == bonusCoordinates[1]) {atomicBomb++; atomicBombFlag = true;}
+
+        // Mudança de imagem
+        if (shipFlag) showHitShip(surroundingCell);
+        else if (bombFlag) showBomb(surroundingCell);
+        else if (atomicBombFlag) showAtomicBomb(surroundingCell);
+        else showOcean(surroundingCell);
+    }
+
+    return;
+}
+
+// Atualizar stats (score and lives)
+function updateScore(numOfShipsHit) {
+    numOfShips -= numOfShipsHit;
+    
+    score += numOfShipsHit;
+    
+    notifElement.innerHTML = `Ships left: ${numOfShips}`;
+    scoreElement.innerHTML = `Score: ${score}`;
+    
+    return;
+}
+
+function updateLives() {
+    lives--;
+    livesElement.innerHTML = `Lives: ${lives}`;
+    
+    return;
+}
+
+// Mensagens de notificação
+function notifyMiss() {
+    notifElement.innerHTML = `You missed xD`;
+    setTimeout(() => notifElement.innerHTML = `Ships left: ${numOfShips}`, 1000);
+    
+    return;
+}
+
+function notifyBonus() {
+    notifElement.innerHTML = `You found a bonus!`;
+    setTimeout(() => notifElement.innerHTML = `Ships left: ${numOfShips}`, 1000);
+    
+    return;
+}
+
+function notifyHit() {
+    notifElement.innerHTML = `It's a Hit!`;
+    setTimeout(() => notifElement.innerHTML = `Ships left: ${numOfShips}`, 1000);
+    
+    return;
+}
+
+// Mudar src da tile atacada
 function showHitShip(tableCell) {
     tableCell.src = './assets/shipwreck.png';
 }
   
-  function showOcean(tableCell) {
+function showOcean(tableCell) {
     tableCell.src = './assets/ocean.png';
+}
+
+function showBomb(tableCell) {
+    tableCell.src = './assets/missile.jpeg';
+}
+
+function showAtomicBomb(tableCell) {
+    tableCell.src = './assets/nuke.jpeg';
 }
