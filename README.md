@@ -1,4 +1,4 @@
-# naval-battle
+# Battleship
 
 (unusually hard) naval battle for loners
 
