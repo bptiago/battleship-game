@@ -43,7 +43,7 @@ function handleClick(i, j) {
             
             updateScore(1);
       
-            if (isNotifDisabled) notifyHit();
+            if (!isNotifDisabled()) notifyHit();
             // update score and lives div
         } else {
             if (tableCell.id == bonusCoordinates[0]) {
@@ -60,7 +60,7 @@ function handleClick(i, j) {
               
               updateLives();
               
-              if (isNotifDisabled) notifyMiss();
+              if (!isNotifDisabled()) notifyMiss();
             }
         }
     } 
@@ -79,13 +79,13 @@ function handleClick(i, j) {
 
         if (numOfShipsHit) {
             updateScore(numOfShipsHit);
-            if (isNotifDisabled) notifyHit();
+            if (!isNotifDisabled()) notifyHit();
         } else if (numOfBonusHit) {
-            if (isNotifDisabled) notifyBonus();
+            if (!isNotifDisabled()) notifyBonus();
         }
         else {
             updateLives();
-            if (isNotifDisabled) notifyMiss();
+            if (!isNotifDisabled()) notifyMiss();
         }
 
         showAttackedTiles(surroundingCells);
@@ -105,13 +105,13 @@ function handleClick(i, j) {
 
         if (numOfShipsHit) {
             updateScore(numOfShipsHit);
-            if (isNotifDisabled) notifyHit();
+            if (!isNotifDisabled()) notifyHit();
         } else if (numOfBonusHit) {
-            if (isNotifDisabled) notifyBonus();
+            if (!isNotifDisabled()) notifyBonus();
         }
         else {
             updateLives();
-            if (isNotifDisabled) notifyMiss();
+            if (!isNotifDisabled()) notifyMiss();
         }
         
         showAttackedTiles(surroundingCells);
